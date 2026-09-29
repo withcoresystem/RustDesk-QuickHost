@@ -4,7 +4,7 @@ Native C++ host-only RustDesk-compatible remote support client for Windows XP / 
 
 ![Downloads](https://img.shields.io/github/downloads/Terence0816/RustDesk-QuickHost/total?label=Downloads)
 [Releases](https://github.com/Terence0816/RustDesk-QuickHost/releases) |
-[Latest Official Build v1.1.2.5](https://github.com/Terence0816/RustDesk-QuickHost/releases/tag/v1.1.2.5) |
+[Latest Official Build v1.1.2.4](https://github.com/Terence0816/RustDesk-QuickHost/releases/tag/v1.1.2.4) |
 [GPL-3.0 License](LICENSE)
 
 English | [繁體中文](#繁體中文)
@@ -18,29 +18,6 @@ It is rewritten from the ground up in native C++ and is designed for computers t
 > This project is compatible with RustDesk-style remote support usage, but it is **not an official RustDesk client**.
 
 ## Version History
-
-### v1.1.2.5
-
-* Fixed remote cursor display issues.
-  * The host now sends the actual Windows cursor image to the controller.
-  * Fixed an issue where the remote cursor was always displayed as a circle.
-  * The arrow, text, hand, resize, and other Windows cursor shapes can now be displayed correctly.
-
-* Fixed the Windows key in some keyboard modes.
-  * Fixed the Windows key not working in `1:1 Mapping Mode` and `Translate Mode Beta`.
-  * Improved compatibility with extended scan-code keys, including right Ctrl, right Alt, arrow keys, Insert, and Delete.
-  * Traditional mode retains its existing input behavior.
-
-* Fixed remote window activation and dragging issues.
-  * Fixed an issue where clicking the visible area of a background window did not bring it to the foreground.
-  * Fixed an issue where window dragging could affect only the window that was already in the foreground.
-  * Mouse press, release, and wheel events now use the correct remote coordinates.
-
-* Improved multi-monitor mouse positioning.
-  * Mouse input now uses Windows absolute virtual-desktop coordinates.
-  * Improved support for multi-monitor systems, extended desktops, and displays using negative coordinates.
-  * A compatibility fallback remains available for older Windows systems or restricted desktop environments.
-
 
 ### v1.1.2.4
 
@@ -180,10 +157,24 @@ It is rewritten from the ground up in native C++ and is designed for computers t
 * `src/`: main native C++ Win32 source code
 * `resources/`: application icons and UI resources
 * `assets/screenshots/`: README screenshots
-* `docs/`: technical notes
+* `third_party/`: vendored libraries and vcpkg overlays
+* `docs/`: technical notes (`docs/BUILD.md` build guide, `docs/CHANGES.md` local changes)
+* `tools/`: verification helpers (`tools/pe_deps.py`)
+* `build.ps1`: Windows x64 static build entry point
 * `rustdesk_cpp_host.ini.example`: sample runtime configuration
 
-Local/private build scripts are intentionally not included because they are specific to the author's local build environment.
+## Building
+
+This copy ships a reproducible x64 static build script. The result is a single
+`RustDeskQS-x64.exe` (static CRT, no VC++ Redistributable) that also runs in a WinPE x64 image.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build.ps1 -Configuration Release
+```
+
+System requirements, step-by-step instructions and verification:
+[`docs/BUILD.md`](docs/BUILD.md). Local modifications compared with upstream:
+[`docs/CHANGES.md`](docs/CHANGES.md).
 
 ## Screenshots
 
@@ -341,28 +332,6 @@ RustDesk QuickHost 是一個輕量化的 **RustDesk 相容 Host-only 被控端�
 
 ## 版本更新紀錄
 
-### v1.1.2.5
-
-* 修復遠端滑鼠游標顯示異常。
-  * 被控端現在會傳送 Windows 實際游標圖形到主控端。
-  * 修復遠端滑鼠游標固定顯示為圓形的問題。
-  * 現在可正確顯示一般箭頭、文字輸入、連結手形、視窗縮放及其他 Windows 游標形態。
-
-* 修復部分鍵盤模式無法使用 Windows 鍵的問題。
-  * 修復「1:1 傳輸模式」與「翻譯模式 beta」下 Windows 鍵無法使用的問題。
-  * 改善右 Ctrl、右 Alt、方向鍵、Insert、Delete 等延伸掃描碼按鍵的相容性。
-  * 傳統模式維持原有輸入方式。
-
-* 修復遠端視窗點擊與拖曳異常。
-  * 修復兩個視窗重疊時，點擊露出的下層視窗卻無法將其切換到最上層的問題。
-  * 修復拖曳視窗時，可能只有原本最上層視窗會有反應的問題。
-  * 滑鼠按下、放開及滾輪操作現在會使用正確的遠端座標。
-
-* 改善多螢幕滑鼠定位。
-  * 滑鼠輸入改用 Windows 絕對虛擬桌面座標。
-  * 改善多螢幕、延伸桌面及負座標排列環境的支援。
-  * 舊版 Windows 或受限桌面環境無法使用時，仍會自動切換至相容模式。
-
 ### v1.1.2.4
 
 * 修正 Excel 在主控端與被控端之間的剪貼簿格式同步問題。
@@ -501,10 +470,23 @@ RustDesk QuickHost 是一個輕量化的 **RustDesk 相容 Host-only 被控端�
 * `src/`：主要 C++ Win32 原始碼
 * `resources/`：程式圖示與 UI 資源
 * `assets/screenshots/`：README 使用的畫面截圖
-* `docs/`：技術說明
+* `third_party/`：內嵌函式庫與 vcpkg overlay
+* `docs/`：技術說明（`docs/BUILD.md` 建置指南、`docs/CHANGES.md` 本機變更）
+* `tools/`：驗證工具（`tools/pe_deps.py`）
+* `build.ps1`：Windows x64 靜態建置進入點
 * `rustdesk_cpp_host.ini.example`：執行時設定檔範例
 
-本機編譯腳本未包含於儲存庫中，因為它們與作者本機建置環境高度相關。
+## 編譯建置
+
+本儲存庫附有可重複的 x64 靜態建置腳本，產出單一 `RustDeskQS-x64.exe`（靜態 CRT，不需安裝
+VC++ Redistributable），亦可在 WinPE x64 環境執行。
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build.ps1 -Configuration Release
+```
+
+系統需求、建置步驟與驗證方式請見 [`docs/BUILD.md`](docs/BUILD.md)；
+與上游的差異請見 [`docs/CHANGES.md`](docs/CHANGES.md)。
 
 ## 畫面截圖
 
